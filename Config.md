@@ -459,3 +459,32 @@ gsettings set org.gnome.desktop.sound allow-volume-above-100-percent false
 ```bash
 sudo timedatectl set-ntp false && sudo timedatectl set-ntp true
 ```
+
+<br>
+
+---
+
+<br>
+
+## Formatting USB
+- For me I prefer exFAT which is supported on android, windows, mac and linux
+- You may also change the partition format of the usb as you want
+```bash
+# Identify the USB Drive
+lsblk
+
+# Unmount Any Active Partitions
+sudo umount /dev/sda1
+
+# Wipe old file signatures
+sudo wipefs -a /dev/sda
+
+# Create a new partition and layout
+sudo fdisk /dev/sda
+# g then Enter — Creates a clean GPT partition table.
+# n then Enter — Creates a new partition (press Enter through the default prompts to use the full drive capacity).
+# w then Enter — Writes the changes to the disk and exits.
+
+# Format the USB Partition
+sudo mkfs.exfat -n "MyUSB" /dev/sda1
+```
