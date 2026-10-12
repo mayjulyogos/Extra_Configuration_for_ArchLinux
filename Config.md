@@ -338,6 +338,7 @@ nano ~/.config/ghostty/config
 
 # config file
 # --- Font ---
+font-family = JetBrains Mono
 font-size = 15
 font-variation = wght=600
 
