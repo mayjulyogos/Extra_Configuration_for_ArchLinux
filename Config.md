@@ -329,6 +329,11 @@ pacman -Q steam
 ```bash
 sudo pacman -Syu ghostty
 
+# 1. Create the ghostty configuration folder
+mkdir -p ~/.config/ghostty
+
+# 2. Open and create the config file as your normal user
+nano ~/.config/ghostty/config
 
 
 # config file
@@ -426,4 +431,30 @@ sudo cp -a /path/to/folder.bak/. /path/to/folder/
 # 5. Remove the backup and restart the service
 sudo rm -rf /path/to/folder.bak
 sudo systemctl start <service-name>
+```
+
+<br>
+
+---
+
+<br>
+
+## How to enable Volume Over-Amplification
+```bash
+# Run this following command line to enable over-amplification
+gsettings set org.gnome.desktop.sound allow-volume-above-100-percent true
+
+# Run this following command line to turn over-amplification back off
+gsettings set org.gnome.desktop.sound allow-volume-above-100-percent false
+```
+
+<br>
+
+---
+
+<br>
+
+## How to resync time
+```bash
+sudo timedatectl set-ntp false && sudo timedatectl set-ntp true
 ```
