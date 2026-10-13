@@ -489,3 +489,14 @@ sudo fdisk /dev/sda
 # Format the USB Partition
 sudo mkfs.exfat -n "MyUSB" /dev/sda1
 ```
+<br>
+
+---
+
+<br>
+
+## Easy Effects
+```bash
+# Install Easy Effects and required dependencies
+sudo pacman -S --needed easyeffects lsp-plugins-lv2 calf zam-plugins-lv2 mda.lv2 libbs2b rnnoise
+```
