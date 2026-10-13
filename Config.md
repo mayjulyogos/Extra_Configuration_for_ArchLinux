@@ -172,6 +172,7 @@ gnome-session-quit --logout
 * Using CoolerControl you may also create your own cooling fan curve which your fan spin following by the temperature of your hardware.
 ```bash
 sudo pacman -S qt6-wayland
+sudo pacman -S liquidctl
 yay -S coolercontrol-bin
 sudo systemctl enable --now coolercontrold
 
