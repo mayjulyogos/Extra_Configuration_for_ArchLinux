@@ -344,10 +344,10 @@ font-size = 15
 font-variation = wght=600
 
 # --- Appearance & Window ---
-foreground = #e2e8f0
-background = #0f172a
-selection-foreground = #0f172a
-selection-background = #94a3b8
+foreground = #ffffff
+background = #000000
+selection-foreground = #ffffff
+selection-background = #000000
 
 # Liquid Glass Visuals
 background-opacity = 0.75
@@ -363,7 +363,7 @@ cursor-style = block
 cursor-style-blink = true
 
 # --- Mouse & Scroll ---
-scrollback-limit = 50000
+scrollback-limit = 100000000
 mouse-hide-while-typing = true
 
 # --- Keybindings ---
