@@ -186,6 +186,35 @@ sudo systemctl enable --now coolercontrold
 
 <br>
 
+## Auto-cpufreq
+```bash
+git clone https://github.com/AdnanHodzic/auto-cpufreq.git
+cd auto-cpufreq
+sudo ./auto-cpufreq-installer
+
+systemctl enable --now auto-cpufreq 
+sudo systemctl mask power-profiles-daemon.service
+```
+
+<br>
+
+---
+
+<br>
+
+## Powerstat
+```bash
+yay -S powerstat
+
+sudo powerstat -R 1 200
+```
+
+<br>
+
+---
+
+<br>
+
 ## Davinci Resolve
 ```bash
 # 1. Set up your AUR development folder and clone the repository
