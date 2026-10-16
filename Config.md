@@ -529,3 +529,202 @@ sudo mkfs.exfat -n "MyUSB" /dev/sda1
 # Install Easy Effects and required dependencies
 sudo pacman -S --needed easyeffects lsp-plugins-lv2 calf zam-plugins-lv2 mda.lv2 libbs2b rnnoise
 ```
+
+<br>
+
+---
+
+<br>
+
+## GNOME Extension
+```text
+Kiwi (is not Apple)
+Unblank lock screen
+Just Perfection
+```
+
+<br>
+
+---
+
+<br>
+
+## Podman — Arch Linux GPU Container
+
+### 1. Install Podman and NVIDIA Container Toolkit
+```bash
+sudo pacman -Syu podman nvidia-container-toolkit
+```
+
+<br>
+
+### 2. Configure NVIDIA GPU Access
+- Generate the NVIDIA Container Device Interface (CDI) configuration:
+```bash
+sudo nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml
+```
+
+- Verify the available GPU devices:
+```bash
+nvidia-ctk cdi list
+```
+
+- Expected output includes:
+```text
+nvidia.com/gpu=0
+nvidia.com/gpu=all
+```
+
+- Ensure the host NVIDIA driver works before continuing:
+```bash
+nvidia-smi
+```
+
+<br>
+
+### 3. Create Persistent Workspace Storage
+- Create a Podman-managed volume for files that should persist independently of the container:
+```bash
+podman volume create arch-workspace
+```
+
+- Inspect the volume:
+```bash
+podman volume inspect arch-workspace
+```
+
+<br>
+
+### 4. Download the Arch Linux Image
+```bash
+podman pull docker.io/library/archlinux:latest
+```
+
+<br>
+
+### 5. Create and Start the Container
+```bash
+podman run -it \
+  --name arch-gpu \
+  --hostname arch-gpu \
+  --pull=never \
+  --device nvidia.com/gpu=all \
+  --security-opt=no-new-privileges \
+  --pids-limit=2048 \
+  --shm-size=1g \
+  --env LANG=C.UTF-8 \
+  --volume arch-workspace:/workspace:rw \
+  --workdir /workspace \
+  docker.io/library/archlinux:latest \
+  /bin/bash
+```
+
+#### Container configuration
+
+| Option                                  | Purpose                                                         |
+| --------------------------------------- | --------------------------------------------------------------- |
+| `--name arch-gpu`                       | Sets the container name                                         |
+| `--hostname arch-gpu`                   | Sets the container hostname                                     |
+| `--pull=never`                          | Uses the previously downloaded image                            |
+| `--device nvidia.com/gpu=all`           | Exposes NVIDIA GPU devices through CDI                          |
+| `--security-opt=no-new-privileges`      | Prevents privilege escalation through setuid/setgid executables |
+| `--pids-limit=2048`                     | Limits the number of processes                                  |
+| `--shm-size=1g`                         | Sets shared memory to 1 GiB                                     |
+| `--env LANG=C.UTF-8`                    | Sets the locale environment variable                            |
+| `--volume arch-workspace:/workspace:rw` | Mounts persistent workspace storage                             |
+| `--workdir /workspace`                  | Starts the shell in `/workspace`                                |
+| `/bin/bash`                             | Starts an interactive Bash shell                                |
+
+<br>
+
+### 6. Initial Container Setup
+- Run these commands inside the container:
+```bash
+pacman -Syu
+
+pacman -S --needed \
+  base-devel \
+  git \
+  nano \
+  vim \
+  less \
+  python \
+  python-pip \
+  procps-ng \
+  iproute2 \
+  iputils \
+  file \
+  which \
+  pciutils \
+  nvidia-utils
+```
+
+- Verify the container and GPU:
+```bash
+cat /etc/os-release
+whoami
+nvidia-smi
+```
+
+- Note: The container shares the host kernel and NVIDIA kernel driver. Do not install another NVIDIA kernel driver inside the container.
+
+<br>
+
+### 7. Container Management
+- Run these commands from the **host terminal**, not from inside the container.
+
+#### Check container status
+```bash
+podman ps
+podman ps -a
+```
+
+- `podman ps` lists running containers, while `podman ps -a` also lists stopped containers.
+
+#### Start and attach to an existing container
+```bash
+podman start -ai arch-gpu
+```
+
+#### Open another shell in a running container
+```bash
+podman exec -it arch-gpu /bin/bash
+```
+
+#### Stop the container
+```bash
+podman stop arch-gpu
+```
+
+#### Inspect the container
+```bash
+podman inspect arch-gpu
+```
+
+#### Inspect workspace storage
+```bash
+podman volume inspect arch-workspace
+```
+
+#### View container logs
+```bash
+podman logs arch-gpu
+```
+
+<br>
+
+### 8. Persistence and Isolation
+- **Container filesystem:** Installed packages and configuration persist when the container stops. Removing the container deletes its writable filesystem.
+- **Workspace volume:** Files under `/workspace` persist independently of the container.
+- **Host filesystem:** Your home directory is not mounted by this configuration.
+- **Kernel:** The container shares the host Linux kernel; it does not boot an independent kernel.
+- **GPU:** The NVIDIA GPU is shared with the host and other processes that can access it.
+
+### To remove the container while preserving the workspace:
+```bash
+podman stop arch-gpu
+podman rm arch-gpu
+podman volume rm arch-workspace # remove workspace volume
+```
+
+- Do not remove the `arch-workspace` volume if you want to keep your workspace files.
