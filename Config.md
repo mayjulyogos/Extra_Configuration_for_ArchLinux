@@ -1,4 +1,4 @@
-# Extra Configurations for Arch Linux
+# Extra configurations for Arch Linux
 
 <br>
 
@@ -207,6 +207,30 @@ sudo systemctl mask power-profiles-daemon.service
 yay -S powerstat
 
 sudo powerstat -R 1 200
+```
+
+<br>
+
+---
+
+<br>
+
+## YT-DLP
+```bash
+# Install tools and dependency
+sudo pacman -S yt-dlp ffmpeg deno
+
+# Verification
+yt-dlp --version
+ffmpeg -version
+deno --version
+
+# Example command lines
+# Video and audio
+yt-dlp --remote-components ejs:github --no-playlist --cookies-from-browser firefox --extractor-args "youtube:player_client=android_vr,web_embedded" -f "bestvideo+bestaudio/best" --merge-output-format mkv --postprocessor-args "ffmpeg:-c:v copy -c:a flac" "Your_Video_URL"
+
+# Audio only
+yt-dlp --remote-components ejs:github --no-playlist --cookies-from-browser firefox --extractor-args "youtube:player_client=android_vr,web_embedded" -f "bestaudio" -x --audio-format flac "Your_Video-URL"
 ```
 
 <br>
