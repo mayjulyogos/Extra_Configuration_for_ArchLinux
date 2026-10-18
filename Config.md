@@ -752,3 +752,38 @@ podman volume rm arch-workspace # remove workspace volume
 ```
 
 - Do not remove the `arch-workspace` volume if you want to keep your workspace files.
+
+<br>
+
+---
+
+<br>
+
+## How to prevent your laptop from being hibernated automatically
+### 1. Edit the logind.conf File
+- Open the systemd logind configuration file using a text editor with root privileges (such as `nano`):
+```bash
+sudo nano /etc/systemd/logind.conf
+```
+
+<br>
+
+### 2. Modify Lid Switch Settings
+- Look for the following lines in the file. You will likely need to remove the `#` symbol at the beginning of each line (to uncomment them) and change their values to `ignore`:
+- `HandleLidSwitch`: Controls behavior when closing the lid on battery power.
+- `HandleLidSwitchExternalPower`: Controls behavior when closing the lid while plugged in.
+- `HandleLidSwitchDocked`: Controls behavior when connected to a docking station or external monitor.
+- Save the file and exit the editor (in `nano`, press `Ctrl + O`, then Enter to save, and `Ctrl + X` to exit).
+```text
+HandleLidSwitch=ignore
+HandleLidSwitchExternalPower=ignore
+HandleLidSwitchDocked=ignore
+```
+
+<br>
+
+### 3. Apply the Changes
+- Restart the `systemd-logind` service to apply your new configuration immediately:
+```bash
+sudo systemctl restart systemd-logind
+```
