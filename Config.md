@@ -787,3 +787,33 @@ HandleLidSwitchDocked=ignore
 ```bash
 sudo systemctl restart systemd-logind
 ```
+
+<br>
+
+---
+
+<br>
+
+## Format USB
+### 1. Check your drive and partitions
+- Plug in your USB drive and run `lsblk` to confirm its partition name (in your case, `/dev/sda1`):
+```bash
+lsblk
+```
+
+<br>
+
+### 2. Close the LUKS container
+- If the partition was previously encrypted, ensure its container is closed so the device isn't busy:
+- (Replace the long LUKS name with whatever matches your specific `lsblk` output if it differs).
+```bash
+sudo cryptsetup close luks-5bc4be54-9010-411d-9f3c-544f5ce14cde
+```
+
+<br>
+
+### 3. Format the partition to exFAT with force
+- Because the partition still holds an old LUKS signature, use the `-F` (force) flag along with `-n` for your label:
+```bash
+sudo mkfs.exfat -F -n "Sandisk" /dev/sda1
+```
