@@ -110,23 +110,36 @@ https://dl.flathub.org/repo/flathub.flatpakrepo
 * Overwrites your Mirrorlist: It takes the fastest, healthiest servers it found and overwrites your main mirror configuration file (/etc/pacman.d/mirrorlist), placing the fastest server at the very top
 ```bash
 sudo pacman -S reflector rsync curl
-
-# Replace or edit the file to match these optimized settings for your region:
-# Save and exit (Ctrl+O, Enter, then Ctrl+X)
+```
+### Replace or edit the file to match these optimized settings for your region:
+- Save and exit (Ctrl+O, Enter, then Ctrl+X)
+```bash
 sudo nano /etc/xdg/reflector/reflector.conf
+```
+
+### Commend out all of the existing lines without # at the begining using #
+- paste this following lines at the bottom of the line
+```text
 --save /etc/pacman.d/mirrorlist
 --protocol https
 --country 'Malaysia,Singapore'
 --latest 20
 --sort rate
 --connection-timeout 15
+```
 
-# Check the mirrorlist file to ensure it shows a new timestamp and a list of local/regional servers:
+### Check the mirrorlist file to ensure it shows a new timestamp and a list of local/regional servers:
+```bash
 cat /etc/pacman.d/mirrorlist
-# Test your download speed by forcing Pacman to refresh its databases using the new mirrors:
-sudo pacman -Syyu
+```
 
-# Enable weekly automation
+### Test your download speed by forcing Pacman to refresh its databases using the new mirrors:
+```bash
+sudo pacman -Syyu
+```
+
+### Enable weekly automation
+```bash
 sudo systemctl enable --now reflector.timer
 ```
 
@@ -306,7 +319,7 @@ sudo systemctl start libvirtd
 <br>
 
 ## Steam installation and unistallation
-* Installation
+* First time Installation
 ```bash
 # 1. Enable multilib repository
 sudo nano /etc/pacman.conf
@@ -323,30 +336,54 @@ sudo pacman -S steam lib32-nvidia-utils lib32-libglvnd
 # Create Steam as a nested Btrfs subvolume.
 # Its contents are not included when @home is snapshotted.
 
-# Make sure Steam is completely closed before continuing
+# Create the parent directory structure
+mkdir -p ~/.local/share
+# Create the dedicated Btrfs subvolume directly where Steam expects its files
+sudo btrfs subvolume create ~/.local/share/Steam
+# Fix ownership permission
+sudo chown -R $USER:$USER ~/.local/share/Steam
+# Verify subvolume creation
+sudo btrfs subvolume list /
+
+# launch steam
+steam
+```
+
+<br>
+
+- Exclude Existing Steam Installation from Btrfs Snapshots
+```bash
+# 1. Make sure Steam is completely closed
 pkill -x steam 2>/dev/null || true
-# Move the Steam installation
+
+# 2. Prepare directories
 mkdir -p ~/.local/share
 
-# If an existing Steam installation exists, temporarily move it away
-if [ -d ~/.local/share/Steam ]; then
+# 3. If an existing standard directory exists, move it to backup
+if [ -d ~/.local/share/Steam ] && [ ! -d ~/.local/share/Steam.bak ]; then
     mv ~/.local/share/Steam ~/.local/share/Steam.bak
 fi
 
-# Create the dedicated Btrfs subvolume
-sudo btrfs subvolume create ~/.local/share/Steam
-
-# Restore existing Steam data if present
-if [ -d ~/.local/share/Steam.bak ]; then
-    cp -a ~/.local/share/Steam.bak/. ~/.local/share/Steam/
-    rm -rf ~/.local/share/Steam.bak
+# 4. Create the dedicated Btrfs subvolume
+# (If it already exists, this will safely do nothing or error out safely)
+if ! btrfs subvolume show ~/.local/share/Steam &>/dev/null; then
+    sudo btrfs subvolume create ~/.local/share/Steam
 fi
 
-# 4. Verify that Steam is a Btrfs subvolume
-sudo btrfs subvolume list /
+# 5. CRITICAL FIX: Fix ownership BEFORE copying files
+sudo chown -R $USER:$USER ~/.local/share/Steam
 
-# 5. Launch Steam
-steam
+# 6. Restore existing Steam data from backup
+if [ -d ~/.local/share/Steam.bak ]; then
+    echo "Restoring Steam files from backup..."
+    cp -a ~/.local/share/Steam.bak/. ~/.local/share/Steam/
+    # Optional: remove backup once you verify everything works
+    # rm -rf ~/.local/share/Steam.bak
+fi
+
+# 7. Verify and launch
+echo "Subvolume status:"
+btrfs subvolume show ~/.local/share/Steam
 ```
 
 <br>
@@ -424,6 +461,9 @@ keybind = ctrl+d=new_split:right
 keybind = ctrl+shift+d=new_split:down
 keybind = ctrl+t=new_tab
 keybind = ctrl+w=close_surface
+
+# --- Enable xterm-256color ---
+term = xterm-256color
 ```
 
 <br>
