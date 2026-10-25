@@ -857,3 +857,52 @@ sudo cryptsetup close luks-5bc4be54-9010-411d-9f3c-544f5ce14cde
 ```bash
 sudo mkfs.exfat -F -n "Sandisk" /dev/sda1
 ```
+
+<br>
+
+---
+
+<br>
+
+## Font Installation
+- To install fonts on Arch Linux, place the font files in the correct directory or install their package, then refresh the system font cache with `fc-cache -fv`.
+### Option 1: Font Installation using pacman packages
+```bash
+# Search for available fonts
+pacman -Ss ttf-
+
+# Install a font package
+sudo pacman -S ttf-noto ttf-liberation
+
+# For popular programming fonts like JetBrains Mono with Nerd Fonts icons
+sudo pacman -S ttf-jetbrains-mono-nerd
+
+# Refresh the font cache to apply changes
+fc-cache -f -v
+
+# Verify the Installation
+# You can check if your system successfully recognizes the newly installed font by listing available fonts matching a name
+fc-list : family | grep "JetBrainsMono"
+```
+
+<br>
+
+### Option 2: Install fonts manually (Custom or Downloaded fonts)
+```bash
+# For user only
+# Create a local font directory if it doesn't exist, and place your font files there
+mkdir -p ~/.local/share/fonts
+cp /path/to/font.ttf ~/.local/share/fonts/
+
+# System-wide (For all users)
+# Place the font files inside /usr/share/fonts/ (you can create a custom subfolder)
+sudo mkdir -p /usr/share/fonts/custom-fonts
+sudo cp /path/to/font.ttf /usr/share/fonts/custom-fonts/
+
+# Refresh the font cache to apply changes
+fc-cache -f -v
+
+# Verify the Installation
+# You can check if your system successfully recognizes the newly installed font by listing available fonts matching a name
+fc-list : family | grep "JetBrainsMono"
+```
