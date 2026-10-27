@@ -198,39 +198,6 @@ sudo systemctl mask power-profiles-daemon.service
 
 <br>
 
-### Enable `Turbo Boost`
-- Create config file
-```bash
-sudo nano /etc/systemd/system/enable-turbo.service
-```
-- Paste these following configs into the file
-```bash
-[Unit]
-Description=Enable Intel Turbo Boost after boot
-After=multi-user.target
-
-[Service]
-Type=oneshot
-ExecStart=/bin/sh -c 'echo 0 > /sys/devices/system/cpu/intel_pstate/no_turbo'
-RemainAfterExit=true
-
-[Install]
-WantedBy=multi-user.target
-```
-- Save and exit (`Ctrl+O`, Enter, then `Ctrl+X`)
-- Enable and start the service so it runs automatically on every boot:
-```bash
-sudo systemctl daemon-reload
-sudo systemctl enable enable-turbo.service
-sudo systemctl start enable-turbo.service
-```
--  Verification
-```bash
-sudo auto-cpufreq --stats
-```
-
-<br>
-
 ---
 
 <br>
