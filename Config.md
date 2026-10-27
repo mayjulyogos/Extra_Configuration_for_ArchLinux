@@ -202,19 +202,6 @@ sudo systemctl mask power-profiles-daemon.service
 
 <br>
 
-## Powerstat
-```bash
-yay -S powerstat
-
-sudo powerstat -R 1 200
-```
-
-<br>
-
----
-
-<br>
-
 ## YT-DLP
 ```bash
 # Install tools and dependency
@@ -665,8 +652,8 @@ podman run -it \
   --shm-size=1g \
   --env LANG=C.UTF-8 \
   --publish 8080:8080 \
-  --volume arch-workspace:/workspace:rw \
-  --workdir /workspace \
+  --volume arch:/arch:rw \
+  --workdir /arch \
   docker.io/library/archlinux:latest \
   /bin/bash
 ```
@@ -675,16 +662,16 @@ podman run -it \
 
 | Option                                  | Purpose                                                            |
 | --------------------------------------- | ------------------------------------------------------------------ |
-| `--name arch-gpu`                       | Sets the container name                                            |
-| `--hostname arch-gpu`                   | Sets the container hostname                                        |
+| `--name arch`                           | Sets the container name                                            |
+| `--hostname arch`                       | Sets the container hostname                                        |
 | `--pull=never`                          | Uses the previously downloaded image                               |
 | `--device nvidia.com/gpu=all`           | Exposes NVIDIA GPU devices through CDI                             |
 | `--security-opt=no-new-privileges`      | Prevents privilege escalation through setuid/setgid executables    |
 | `--pids-limit=2048`                     | Limits the number of processes                                     |
 | `--shm-size=1g`                         | Sets shared memory to 1 GiB                                        |
 | `--env LANG=C.UTF-8`                    | Sets the locale environment variable                               |
-| `--volume arch-workspace:/workspace:rw` | Mounts persistent workspace storage                                |
-| `--workdir /workspace`                  | Starts the shell in `/workspace`                                   |
+| `--volume arch:/arch:rw`                | Mounts persistent workspace storage                                |
+| `--workdir /arch`                       | Starts the shell in `/arch`                                        |
 | `--publish 8080:8080`                   | Exclude specific port which is accessible for both host and client |
 | `/bin/bash`                             | Starts an interactive Bash shell                                   |
 
@@ -749,7 +736,6 @@ nvcc --version
 
 #### Check container status
 ```bash
-podman ps
 podman ps -a
 ```
 
@@ -757,32 +743,32 @@ podman ps -a
 
 #### Start and attach to an existing container
 ```bash
-podman start -ai arch-gpu
+podman start -ai arch
 ```
 
 #### Open another shell in a running container
 ```bash
-podman exec -it arch-gpu /bin/bash
+podman exec -it arch /bin/bash
 ```
 
 #### Stop the container
 ```bash
-podman stop arch-gpu
+podman stop arch
 ```
 
 #### Inspect the container
 ```bash
-podman inspect arch-gpu
+podman inspect arch
 ```
 
 #### Inspect workspace storage
 ```bash
-podman volume inspect arch-workspace
+podman volume inspect arch
 ```
 
 #### View container logs
 ```bash
-podman logs arch-gpu
+podman logs arch
 ```
 
 <br>
@@ -796,9 +782,9 @@ podman logs arch-gpu
 
 ### To remove the container while preserving the workspace:
 ```bash
-podman stop arch-gpu
-podman rm arch-gpu
-podman volume rm arch-workspace # remove workspace volume
+podman stop arch
+podman rm arch
+podman volume rm arch # remove workspace volume
 ```
 
 - Do not remove the `arch-workspace` volume if you want to keep your workspace files.
@@ -1072,3 +1058,11 @@ sudo mv 16ea896f904533fb76d6a73357f95089b2c1b586d3bffa4810cb910423e86c6f ./final
   --port 8080 \
   -c 40960
 ```
+
+| Prameters  | Purpose                                          |
+| ---------- | ------------------------------------------------ |
+| `-m`       | Clarify your model location                      |
+| `--mmproj` | Clarify your model location for visual support   |
+| `-host`    | Clarify the host port your model going to run on |
+| `-port`    | Clarify the accessible port for web UI           |
+| `-c`       | Sets the context windows                         |
