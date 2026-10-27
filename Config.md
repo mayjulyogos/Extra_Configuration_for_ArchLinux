@@ -537,6 +537,7 @@ sudo timedatectl set-ntp false && sudo timedatectl set-ntp true
 ## Formatting USB
 - For me I prefer exFAT which is supported on android, windows, mac and linux
 - You may also change the partition format of the usb as you want
+- Remember to format your partition as `MBR` instead of `GPT` for compatibility
 ```bash
 # Identify the USB Drive
 lsblk
