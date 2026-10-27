@@ -110,36 +110,23 @@ https://dl.flathub.org/repo/flathub.flatpakrepo
 * Overwrites your Mirrorlist: It takes the fastest, healthiest servers it found and overwrites your main mirror configuration file (/etc/pacman.d/mirrorlist), placing the fastest server at the very top
 ```bash
 sudo pacman -S reflector rsync curl
-```
-### Replace or edit the file to match these optimized settings for your region:
-- Save and exit (Ctrl+O, Enter, then Ctrl+X)
-```bash
-sudo nano /etc/xdg/reflector/reflector.conf
-```
 
-### Commend out all of the existing lines without # at the begining using #
-- paste this following lines at the bottom of the line
-```text
+# Replace or edit the file to match these optimized settings for your region:
+# Save and exit (Ctrl+O, Enter, then Ctrl+X)
+sudo nano /etc/xdg/reflector/reflector.conf
 --save /etc/pacman.d/mirrorlist
 --protocol https
 --country 'Malaysia,Singapore'
 --latest 20
 --sort rate
 --connection-timeout 15
-```
 
-### Check the mirrorlist file to ensure it shows a new timestamp and a list of local/regional servers:
-```bash
+# Check the mirrorlist file to ensure it shows a new timestamp and a list of local/regional servers:
 cat /etc/pacman.d/mirrorlist
-```
-
-### Test your download speed by forcing Pacman to refresh its databases using the new mirrors:
-```bash
+# Test your download speed by forcing Pacman to refresh its databases using the new mirrors:
 sudo pacman -Syyu
-```
 
-### Enable weekly automation
-```bash
+# Enable weekly automation
 sudo systemctl enable --now reflector.timer
 ```
 
@@ -615,7 +602,7 @@ Just Perfection
 
 ## Podman — Arch Linux GPU Container
 
-### 1. Install Podman and NVIDIA Container Toolkit
+### 1. Install Podman and NVIDIA Container Toolkit on the host site
 ```bash
 sudo pacman -Syu podman nvidia-container-toolkit
 ```
@@ -669,14 +656,15 @@ podman pull docker.io/library/archlinux:latest
 ### 5. Create and Start the Container
 ```bash
 podman run -it \
-  --name arch-gpu \
-  --hostname arch-gpu \
+  --name arch \
+  --hostname arch \
   --pull=never \
   --device nvidia.com/gpu=all \
   --security-opt=no-new-privileges \
   --pids-limit=2048 \
   --shm-size=1g \
   --env LANG=C.UTF-8 \
+  --publish 8080:8080 \
   --volume arch-workspace:/workspace:rw \
   --workdir /workspace \
   docker.io/library/archlinux:latest \
@@ -685,19 +673,20 @@ podman run -it \
 
 #### Container configuration
 
-| Option                                  | Purpose                                                         |
-| --------------------------------------- | --------------------------------------------------------------- |
-| `--name arch-gpu`                       | Sets the container name                                         |
-| `--hostname arch-gpu`                   | Sets the container hostname                                     |
-| `--pull=never`                          | Uses the previously downloaded image                            |
-| `--device nvidia.com/gpu=all`           | Exposes NVIDIA GPU devices through CDI                          |
-| `--security-opt=no-new-privileges`      | Prevents privilege escalation through setuid/setgid executables |
-| `--pids-limit=2048`                     | Limits the number of processes                                  |
-| `--shm-size=1g`                         | Sets shared memory to 1 GiB                                     |
-| `--env LANG=C.UTF-8`                    | Sets the locale environment variable                            |
-| `--volume arch-workspace:/workspace:rw` | Mounts persistent workspace storage                             |
-| `--workdir /workspace`                  | Starts the shell in `/workspace`                                |
-| `/bin/bash`                             | Starts an interactive Bash shell                                |
+| Option                                  | Purpose                                                            |
+| --------------------------------------- | ------------------------------------------------------------------ |
+| `--name arch-gpu`                       | Sets the container name                                            |
+| `--hostname arch-gpu`                   | Sets the container hostname                                        |
+| `--pull=never`                          | Uses the previously downloaded image                               |
+| `--device nvidia.com/gpu=all`           | Exposes NVIDIA GPU devices through CDI                             |
+| `--security-opt=no-new-privileges`      | Prevents privilege escalation through setuid/setgid executables    |
+| `--pids-limit=2048`                     | Limits the number of processes                                     |
+| `--shm-size=1g`                         | Sets shared memory to 1 GiB                                        |
+| `--env LANG=C.UTF-8`                    | Sets the locale environment variable                               |
+| `--volume arch-workspace:/workspace:rw` | Mounts persistent workspace storage                                |
+| `--workdir /workspace`                  | Starts the shell in `/workspace`                                   |
+| `--publish 8080:8080`                   | Exclude specific port which is accessible for both host and client |
+| `/bin/bash`                             | Starts an interactive Bash shell                                   |
 
 <br>
 
@@ -720,7 +709,9 @@ pacman -S --needed \
   file \
   which \
   pciutils \
-  nvidia-utils
+  cmake \
+  ninja \
+  aria2
 ```
 
 - Verify the container and GPU:
@@ -731,6 +722,25 @@ nvidia-smi
 ```
 
 - Note: The container shares the host kernel and NVIDIA kernel driver. Do not install another NVIDIA kernel driver inside the container.
+
+- cuda installation
+```bash
+# Install CUDA
+pacman -S cuda
+
+# You may face file conflict because the files listed (`nvidia.icd` and the OpenCL library files) already exist within your container's filesystem.
+# To bypass this conflict and force Pacman to overwrite the existing files, run the installation command with the --overwrite flag:
+pacman -S cuda --overwrite '*'
+
+# 1. Source the CUDA profile script
+source /etc/profile.d/cuda.sh
+
+# Alternatively, add the path directly if the script isn't found:
+export PATH=/opt/cuda/bin:$PATH
+
+# Verification
+nvcc --version
+```
 
 <br>
 
@@ -792,6 +802,44 @@ podman volume rm arch-workspace # remove workspace volume
 ```
 
 - Do not remove the `arch-workspace` volume if you want to keep your workspace files.
+
+<br>
+
+---
+
+<br>
+
+## How to exclude podman from being snapshot
+```bash
+# 1. Stop the podman service and socket to release any locked files
+sudo systemctl stop podman.service podman.socket
+
+# 2. Move the existing containers directory to a temporary backup
+sudo mv /var/lib/containers /var/lib/containers.bak
+
+# 3. Create a new Btrfs subvolume where the directory used to be
+sudo btrfs subvolume create /var/lib/containers
+
+# 4. Copy your existing Podman data back into the new subvolume
+sudo cp -a /var/lib/containers.bak/. /var/lib/containers/
+
+# 5. Clean up the backup folder
+sudo rm -rf /var/lib/containers.bak
+
+# 6. Restart the podman service
+sudo systemctl start podman.service
+
+# Verification
+# 1. Check the subvolume status
+sudo btrfs subvolume show /var/lib/containers
+
+# 2. List all Btrfs subvolumes
+# Confirm that /var/lib/containers appears in your system's subvolume list:
+sudo btrfs subvolume list /
+
+# 3. Verify podman storage and status
+podman system info
+```
 
 <br>
 
@@ -905,4 +953,122 @@ fc-cache -f -v
 # Verify the Installation
 # You can check if your system successfully recognizes the newly installed font by listing available fonts matching a name
 fc-list : family | grep "JetBrainsMono"
+```
+
+<br>
+
+---
+
+<br>
+
+## Llama.cpp
+
+<br>
+
+### Install Dependencies
+```bash
+pacman -Syu
+
+pacman -S --needed \
+  base-devel \
+  git \
+  nano \
+  vim \
+  less \
+  python \
+  python-pip \
+  procps-ng \
+  iproute2 \
+  iputils \
+  file \
+  which \
+  pciutils \
+  cmake \
+  ninja \
+  aria2
+```
+
+<br>
+
+### Install CUDA (CUDA TOOL-KIT)
+```bash
+pacman -S cuda
+
+# You may face file conflict because the files listed (`nvidia.icd` and the OpenCL library files) already exist within your container's filesystem.
+# To bypass this conflict and force Pacman to overwrite the existing files, run the installation command with the --overwrite flag:
+pacman -S cuda --overwrite '*'
+
+# 1. Source the CUDA profile script
+source /etc/profile.d/cuda.sh
+
+# Alternatively, add the path directly if the script isn't found:
+export PATH=/opt/cuda/bin:$PATH
+
+# Verification
+nvcc --version
+```
+
+<br>
+
+### Git clone llama.cpp repository
+```bash
+git clone https://github.com/ggml-org/llama.cpp
+cd llama.cpp
+```
+
+<br>
+
+### Build llama.cpp using CUDA
+```bash
+cmake -B build -DGGML_CUDA=ON
+cmake --build build --config Release --parallel $(nproc)
+```
+
+<br>
+
+### Download models
+- Models will be downloaded at `/root/.cache/huggingface/hub/blobs/.....`
+- Models files name will be a bunch of letters and numbers such as `10cc391b403021dd11c614679d2fd92f611c3681d29e29651b717316965d61e1`
+- Use `sudo mv 10cc391b403021dd11c614679d2fd92f611c3681d29e29651b717316965d61e1 ./new_file_name` to rename it
+- Move the file to `llama.cpp/models` by using `sudo mv new_file_name /path_to/llama.cpp/models` for easier file management
+- Rename the file and move the file once by `sudo mv 10cc391b403021dd11c614679d2fd92f611c3681d29e29651b717316965d61e1 /path_to/llama.cpp/models/new_file_name`
+```bash
+# Start a local Open-AI compatible server with a web UI:
+# This command is used to download model files and run the model with network connection
+./build/bin/llama-server -hf unsloth/Qwen3.5-4B-GGUF:Q8_0 --host 0.0.0.0 --port 8080
+
+# Run inference directly in the terminal
+./build/bin/llama-cli -hf unsloth/Qwen3.5-4B-GGUF:Q8_0
+
+# You may also download the model files using aria2
+aria2c -x 16 'model_files_address'
+
+# After downloading the model files using aria2 you may need to rename the file
+sudo mv 16ea896f904533fb76d6a73357f95089b2c1b586d3bffa4810cb910423e86c6f ./final_file_name
+```
+
+<br>
+
+### Run Models
+```bash
+./build/bin/llama-server \
+  -m ./models/gemma-3-4b-it-Q8_0.gguf \
+  --mmproj ./models/mmproj-F32.gguf \
+  --host 0.0.0.0 \
+  --port 8080 \
+  -c 20480
+  
+./build/bin/llama-server \
+  -m ./models/gemma-3-4b-it-Q4_0.gguf \
+  --mmproj ./models/mmproj-F16.gguf \
+  --host 0.0.0.0 \
+  --port 8080 \
+  -c 16384
+  
+./build/bin/llama-server \
+  -m ./models/Qwen3.5-4B-Q6_K.gguf \
+  --mmproj ./models/mmproj-BF16.gguf \
+  --host 0.0.0.0 \
+  --port 8080 \
+  -c 40960
 ```
