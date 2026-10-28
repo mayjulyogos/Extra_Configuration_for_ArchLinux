@@ -198,6 +198,45 @@ sudo systemctl mask power-profiles-daemon.service
 
 <br>
 
+### Enable HWP Dynamic Boost
+- Use a Startup Script (rc.local or systemd service)
+#### 1. Create a new service file
+```bash
+sudo nano /etc/systemd/system/enable-hwp-dynamic-boost.service
+```
+
+#### 2. Paste the following configuration into the file
+```bash
+[Unit]
+Description=Enable Intel HWP Dynamic Boost on Boot
+After=multi-user.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'echo 1 > /sys/devices/system/cpu/intel_pstate/hwp_dynamic_boost'
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target
+```
+
+#### 3. Save and exit (`Ctrl+O`, Enter, then `Ctrl+X`)
+
+#### 4. Enable and start the service so it runs automatically on every boot:
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now enable-hwp-dynamic-boost.service
+```
+#### 5. Verification
+- It should now output `1`
+```bash
+cat /sys/devices/system/cpu/intel_pstate/hwp_dynamic_boost
+
+sudo auto-cpufreq --stats
+```
+
+<br>
+
 ---
 
 <br>
