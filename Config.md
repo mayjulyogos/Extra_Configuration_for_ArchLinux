@@ -841,26 +841,26 @@ podman volume rm arch # remove workspace volume
 sudo systemctl stop podman.service podman.socket
 
 # 2. Move the existing containers directory to a temporary backup
-sudo mv /var/lib/containers /var/lib/containers.bak
+sudo mv /home/arch/.local/share/containers /home/arch/.local/share/containers.bak
 
 # 3. Create a new Btrfs subvolume where the directory used to be
-sudo btrfs subvolume create /var/lib/containers
+sudo btrfs subvolume create /home/arch/.local/share/containers
 
 # 4. Copy your existing Podman data back into the new subvolume
-sudo cp -a /var/lib/containers.bak/. /var/lib/containers/
+sudo cp -a /home/arch/.local/share/containers.bak/. /home/arch/.local/share/containers/
 
 # 5. Clean up the backup folder
-sudo rm -rf /var/lib/containers.bak
+sudo rm -rf /home/arch/.local/share/containers.bak
 
 # 6. Restart the podman service
 sudo systemctl start podman.service
 
 # Verification
 # 1. Check the subvolume status
-sudo btrfs subvolume show /var/lib/containers
+sudo btrfs subvolume show /home/arch/.local/share/containers
 
 # 2. List all Btrfs subvolumes
-# Confirm that /var/lib/containers appears in your system's subvolume list:
+# Confirm that /home/arch/.local/share/containers appears in your system's subvolume list:
 sudo btrfs subvolume list /
 
 # 3. Verify podman storage and status
