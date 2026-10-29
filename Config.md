@@ -401,6 +401,26 @@ btrfs subvolume show ~/.local/share/Steam
 
 <br>
 
+- GE-Proton Installation for games compatibility
+```bash
+cd ~/.local/share/Steam/compatibilitytools.d/
+
+# Download GE-Proton
+wget https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton11-11/GE-Proton11-11-x86_64.tar.gz
+
+# Extract the tar.gz file
+tar -xf GE-Proton11-11-x86_64.tar.gz
+
+# Remove the extracted tar.gz file
+rm GE-Proton11-11-x86_64.tar.gz
+
+# FULLY SHUTDOWN Your Steam app
+# RESTART Your Steam App 
+# Now you should see GE-Proton... available under the compaitibility tool table
+```
+
+<br>
+
 * Uninstallation
 ```bash
 # Make sure Steam is completely closed
