@@ -109,24 +109,28 @@ https://dl.flathub.org/repo/flathub.flatpakrepo
 * Tests Speed & Latency: It runs a live connection speed test against the working mirrors
 * Overwrites your Mirrorlist: It takes the fastest, healthiest servers it found and overwrites your main mirror configuration file (/etc/pacman.d/mirrorlist), placing the fastest server at the very top
 ```bash
+# 1. Install required packages
 sudo pacman -S reflector rsync curl
 
-# Replace or edit the file to match these optimized settings for your region:
-# Save and exit (Ctrl+O, Enter, then Ctrl+X)
-sudo nano /etc/xdg/reflector/reflector.conf
+# 2. Write your optimized settings directly to the reflector configuration file
+sudo tee /etc/xdg/reflector/reflector.conf > /dev/null << 'EOF'
 --save /etc/pacman.d/mirrorlist
 --protocol https
 --country 'Malaysia,Singapore'
 --latest 20
 --sort rate
+--download-timeout 30
 --connection-timeout 15
+EOF
 
-# Check the mirrorlist file to ensure it shows a new timestamp and a list of local/regional servers:
+# 3. Verify the generated mirrorlist file shows a new timestamp and regional servers
 cat /etc/pacman.d/mirrorlist
-# Test your download speed by forcing Pacman to refresh its databases using the new mirrors:
+
+# 4. Run reflector using your config file and test/refresh pacman databases
+sudo reflector @/etc/xdg/reflector/reflector.conf
 sudo pacman -Syyu
 
-# Enable weekly automation
+# 5. Enable weekly automation via systemd timer
 sudo systemctl enable --now reflector.timer
 ```
 
