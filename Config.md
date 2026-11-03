@@ -109,28 +109,24 @@ https://dl.flathub.org/repo/flathub.flatpakrepo
 * Tests Speed & Latency: It runs a live connection speed test against the working mirrors
 * Overwrites your Mirrorlist: It takes the fastest, healthiest servers it found and overwrites your main mirror configuration file (/etc/pacman.d/mirrorlist), placing the fastest server at the very top
 ```bash
-# 1. Install required packages
 sudo pacman -S reflector rsync curl
 
-# 2. Write your optimized settings directly to the reflector configuration file
-sudo tee /etc/xdg/reflector/reflector.conf > /dev/null << 'EOF'
+# Replace or edit the file to match these optimized settings for your region:
+# Save and exit (Ctrl+O, Enter, then Ctrl+X)
+sudo nano /etc/xdg/reflector/reflector.conf
 --save /etc/pacman.d/mirrorlist
 --protocol https
 --country 'Malaysia,Singapore'
 --latest 20
 --sort rate
---download-timeout 30
 --connection-timeout 15
-EOF
 
-# 3. Verify the generated mirrorlist file shows a new timestamp and regional servers
+# Check the mirrorlist file to ensure it shows a new timestamp and a list of local/regional servers:
 cat /etc/pacman.d/mirrorlist
-
-# 4. Run reflector using your config file and test/refresh pacman databases
-sudo reflector @/etc/xdg/reflector/reflector.conf
+# Test your download speed by forcing Pacman to refresh its databases using the new mirrors:
 sudo pacman -Syyu
 
-# 5. Enable weekly automation via systemd timer
+# Enable weekly automation
 sudo systemctl enable --now reflector.timer
 ```
 
@@ -140,15 +136,39 @@ sudo systemctl enable --now reflector.timer
 
 <br>
 
-## exFat support
-* exFat is a modern file system created by Microsoft in 2006 to handle large files on flash drives and memory cards.
-* No 4GB Limit: Unlike FAT32, it stores single files much larger than 4GB
-* Cross-Platform: It works natively on both Windows and macOS computers
-* Great for Flash Media: It is optimized for USB thumb drives and SD cards
-* No Journaling: It lacks a recovery log, making it prone to data corruption if unplugged improperly
-* No Security: It does not support file-level permissions or built-in encryption
+
+## Firewalld & GNOME Integration
 ```bash
-sudo pacman -S exfatprogs
+su
+
+# Install firewalld and the graphical configuration tool
+pacman -S firewalld network-manager-applet
+
+# Enable and start the service
+systemctl enable --now firewalld
+
+# Install AppArmor and the default profiles
+pacman -S apparmor
+
+# Enable the systemd service
+systemctl enable apparmor.service
+
+nano /etc/default/grub
+GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet rhgb rd.driver.blacklist=nouveau,nova_core modprobe.blacklist=nouveau,nova_core nvidia-drm.modeset=1 nvidia-drm.fbdev=1 acpi_backlight=native apparmor=1 lsm=landlock,lockdown,yama,apparmor,bpf"
+# Ctrl + O, Enter, then Ctrl + X
+
+grub-mkconfig -o /boot/grub/grub.cfg
+
+pacman -S firewall-config
+
+# Automatically inject nvidia modules into mkinitcpio.conf for early loading (KMS)
+sed -i 's/^MODULES=(/MODULES=(nvidia nvidia_modeset nvidia_uvm nvidia_drm /' /etc/mkinitcpio.conf
+
+# Regenerate the initramfs
+mkinitcpio -P
+
+# Regenerate grub one more time to apply the command line arguments
+grub-mkconfig -o /boot/grub/grub.cfg
 ```
 
 <br>
@@ -157,13 +177,54 @@ sudo pacman -S exfatprogs
 
 <br>
 
-## Chinese Input (Optional)
-* This following chinese input tool is specified for GNOME
-* If using hyprland you may use fcitx5
+##  Configure Audio and Bluetooth
 ```bash
-sudo pacman -S ibus-libpinyin wqy-microhei wqy-zenhei
+su
 
-gnome-session-quit --logout
+pacman -Syu
+pacman -S \
+pulseaudio \
+pipewire \
+wireplumber \
+pipewire-alsa \
+pipewire-pulse \
+pipewire-jack \
+alsa-utils \
+sof-firmware \
+alsa-firmware
+
+pacman -S bluez bluez-utils
+
+systemctl enable --now bluetooth.service
+
+reboot
+```
+
+<br>
+
+---
+
+<br>
+
+## GPU Drivers Installation
+* You may install the GPU Driver by following the GPU you use so you don't need to install intel GPU if you are using AMD GPU
+```bash
+sudo pacman -S nvidia-utils nvidia-settings nvidia-open-dkms linux-headers libva-nvidia-driver libva-utils # nvidia drivers
+
+sudo pacman -S linux-firmware mesa vulkan-intel intel-media-driver libva-utils intel-gpu-tools # intel drivers
+
+sudo pacman -S mesa lib32-mesa xf86-video-amdgpu vulkan-radeon lib32-vulkan-radeon # AMD GPU
+```
+
+<br>
+
+---
+
+<br>
+
+## CUDA
+```bash
+sudo pacman -S cuda
 ```
 
 <br>
@@ -261,6 +322,16 @@ yt-dlp --remote-components ejs:github --no-playlist --cookies-from-browser firef
 
 # Audio only
 yt-dlp --remote-components ejs:github --no-playlist --cookies-from-browser firefox --extractor-args "youtube:player_client=android_vr,web_embedded" -f "bestaudio" -x --audio-format flac "Your_Video-URL"
+
+# Old TVs Compatibility
+yt-dlp --remote-components ejs:github --no-playlist  
+--cookies-from-browser firefox \  
+  --extractor-args "youtube:player_client=android_vr,web_embedded" \  
+  -f "bv*[height<=1080][fps<=30][vcodec^=avc1]+ba[acodec^=mp4a] /  
+b[height<=1080][fps<=30]" \  
+  --merge-output-format mkv \  
+  --postprocessor-args "ffmpeg:-c:v copy -c:a aac -b:a 192k" \  
+  "[https://www.youtube.com/watch?v=pszihOrS21g](https://www.youtube.com/watch?v=pszihOrS21g)"
 ```
 
 <br>
@@ -571,13 +642,9 @@ sudo systemctl start <service-name>
 
 <br>
 
-## How to enable Volume Over-Amplification
+## How to resync time
 ```bash
-# Run this following command line to enable over-amplification
-gsettings set org.gnome.desktop.sound allow-volume-above-100-percent true
-
-# Run this following command line to turn over-amplification back off
-gsettings set org.gnome.desktop.sound allow-volume-above-100-percent false
+sudo timedatectl set-ntp false && sudo timedatectl set-ntp true
 ```
 
 <br>
@@ -586,11 +653,16 @@ gsettings set org.gnome.desktop.sound allow-volume-above-100-percent false
 
 <br>
 
-## How to resync time
+## exFat support
+* exFat is a modern file system created by Microsoft in 2006 to handle large files on flash drives and memory cards.
+* No 4GB Limit: Unlike FAT32, it stores single files much larger than 4GB
+* Cross-Platform: It works natively on both Windows and macOS computers
+* Great for Flash Media: It is optimized for USB thumb drives and SD cards
+* No Journaling: It lacks a recovery log, making it prone to data corruption if unplugged improperly
+* No Security: It does not support file-level permissions or built-in encryption
 ```bash
-sudo timedatectl set-ntp false && sudo timedatectl set-ntp true
+sudo pacman -S exfatprogs
 ```
-
 <br>
 
 ---
@@ -620,6 +692,8 @@ sudo fdisk /dev/sda
 # Format the USB Partition
 sudo mkfs.exfat -n "MyUSB" /dev/sda1
 ```
+
+
 <br>
 
 ---
@@ -630,19 +704,6 @@ sudo mkfs.exfat -n "MyUSB" /dev/sda1
 ```bash
 # Install Easy Effects and required dependencies
 sudo pacman -S --needed easyeffects lsp-plugins-lv2 calf zam-plugins-lv2 mda.lv2 libbs2b rnnoise
-```
-
-<br>
-
----
-
-<br>
-
-## GNOME Extension
-```text
-Kiwi (is not Apple)
-Unblank lock screen
-Just Perfection
 ```
 
 <br>
@@ -951,10 +1012,30 @@ sudo cryptsetup close luks-5bc4be54-9010-411d-9f3c-544f5ce14cde
 <br>
 
 ### 3. Format the partition to exFAT with force
-- Because the partition still holds an old LUKS signature, use the `-F` (force) flag along with `-n` for your label:
+#### 1.Create an MBR Partition Table: Whole Disk Partitioning.
+
+- Use `parted` to wipe the disk and create a new MBR (referred to as `msdos` in parted) partition table on the whole drive:
+```bash
+sudo parted /dev/sda --script mklabel msdos
+```
+
+- _Verification:_ Run `sudo parted /dev/sda print` and check that the "Partition Table" field reads `msdos`.
+
+#### 2.Create a Primary Partition: Partition Creation.
+- Create a primary partition that spans the entire drive and set it up:
+```bash
+sudo parted /dev/sda --script mkpart primary exfat 0% 100%
+```
+
+- _Verification:_ Run `lsblk /dev/sda` and confirm that `/dev/sda1` now exists.
+
+##### 3.Format the Partition with exFAT: Filesystem Formatting.
+- Now, run your original command to apply the exFAT filesystem to the new MBR partition:
 ```bash
 sudo mkfs.exfat -F -n "Sandisk" /dev/sda1
 ```
+
+- _Verification:_ The output will confirm the volume was successfully created and labeled "Sandisk".
 
 <br>
 
