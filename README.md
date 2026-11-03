@@ -9,15 +9,15 @@ This is a personal workflow which shows how i set up my own arch linux.
 <br>
 
 ## Features
-* YAY and Pacman Package Manager Configs
-* Flatpak Installation
-* Reflector
-* exFAT support
-* CoolorControl
-* Davinci Resolve Installation
-* Virtual Machine Platform ( Qemu & KVM libvirt)
-* Steam Installation & Uninstallation
-* Excluding Files from being backed up by system snapshots
+- `Reflector` (Optimize mirrors first for faster downloads)
+- `exFAT` support (Ensure proper filesystem support for external storage)
+- `Excluding Files` from being backed up by system snapshots (Configure backup rules early)
+- `YAY` and `Pacman` Package Manager Configs (Configure native package managers & AUR helper)
+- `Flatpak` Installation (Add sandboxed application support)
+- `CoolerControl` (Manage system hardware and fan profiles)
+- `Davinci Resolve` Installation (Set up media editing environment)
+- `Steam` Installation & Uninstallation (Configure gaming runtime)
+- Virtual Machine Platform `(Qemu & KVM libvirt)` (Set up hypervisor and virtualization stack)
 
 <br>
 
