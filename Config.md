@@ -125,7 +125,7 @@ sudo nano /etc/xdg/reflector/reflector.conf
 cat /etc/pacman.d/mirrorlist
 # Test your download speed by forcing Pacman to refresh its databases using the new mirrors:
 sudo pacman -Syyu
-
+c
 # Enable weekly automation
 sudo systemctl enable --now reflector.timer
 ```
@@ -318,20 +318,13 @@ deno --version
 
 # Example command lines
 # Video and audio
-yt-dlp --remote-components ejs:github --no-playlist --cookies-from-browser firefox --extractor-args "youtube:player_client=android_vr,web_embedded" -f "bestvideo+bestaudio/best" --merge-output-format mkv --postprocessor-args "ffmpeg:-c:v copy -c:a flac" "Your_Video_URL"
+yt-dlp -f "bestvideo+bestaudio/best" --merge-output-format mkv --audio-format flac -x "https://www.youtube.com/watch?v=R8MZbl-GRdY"
 
 # Audio only
-yt-dlp --remote-components ejs:github --no-playlist --cookies-from-browser firefox --extractor-args "youtube:player_client=android_vr,web_embedded" -f "bestaudio" -x --audio-format flac "Your_Video-URL"
+yt-dlp -f "bestaudio" -x --audio-format flac "https://www.youtube.com/watch?v=R8MZbl-GRdY"
 
 # Old TVs Compatibility
-yt-dlp --remote-components ejs:github --no-playlist  
---cookies-from-browser firefox \  
-  --extractor-args "youtube:player_client=android_vr,web_embedded" \  
-  -f "bv*[height<=1080][fps<=30][vcodec^=avc1]+ba[acodec^=mp4a] /  
-b[height<=1080][fps<=30]" \  
-  --merge-output-format mkv \  
-  --postprocessor-args "ffmpeg:-c:v copy -c:a aac -b:a 192k" \  
-  "[https://www.youtube.com/watch?v=pszihOrS21g](https://www.youtube.com/watch?v=pszihOrS21g)"
+yt-dlp --no-playlist -f "bv*[height<=1080][fps<=30]+ba/b[height<=1080][fps<=30]" --recode-video mp4 --postprocessor-args "ffmpeg:-c:v libx264 -preset fast -crf 22 -c:a aac -b:a 192k" "https://www.youtube.com/watch?v=pszihOrS21g"
 ```
 
 <br>
@@ -783,6 +776,44 @@ podman run -it \
   /bin/bash
 ```
 
+### Custom Container without default distro
+- Install this following package on your `Host system`
+```bash
+sudo pacman -S arch-install-scripts
+```
+- Creat You custom `rootfs`
+```bash
+mkdir /tmp/custom-rootfs
+sudo pacstrap -C /etc/pacman.conf /tmp/custom-rootfs base base-devel
+```
+- Compress your `rootfs` and bring it into `Podman` as a `local image`
+```bash
+# Create the tarball
+sudo tar -C /tmp/custom-rootfs -c . -f /tmp/custom-rootfs.tar
+
+# Import it into Podman
+podman import /tmp/custom-rootfs.tar localhost/my-custom-rootfs:latest
+```
+- Run this following command line to create your podman contianer
+```bash
+podman run -it \
+--name arch-custom \
+--hostname arch \
+--pull=never \
+--device nvidia.com/gpu=all \
+--security-opt=no-new-privileges \
+--pids-limit=2048 \
+--shm-size=1g \
+--env LANG=C.UTF-8 \
+--publish 8080:8080 \
+--volume arch:/arch:rw \
+--workdir /arch \
+localhost/my-custom-arch:latest \
+/bin/bash
+```
+
+<br>
+
 #### Container configuration
 
 | Option                                  | Purpose                                                            |
@@ -1211,3 +1242,164 @@ sudo mv 16ea896f904533fb76d6a73357f95089b2c1b586d3bffa4810cb910423e86c6f ./final
 | `-host`    | Clarify the host port your model going to run on |
 | `-port`    | Clarify the accessible port for web UI           |
 | `-c`       | Sets the context windows                         |
+
+<br>
+
+---
+
+<br>
+
+## SSH (Secured)
+### Installation
+```bash
+sudo pacman -S openssh
+```
+- Enable `SSH` service
+```bash
+sudo systemctl enable sshd
+```
+
+<br>
+
+### SSH Keys
+- Don't use a `password` to `login` your `server`
+- Use `SSH Keys`
+```bash
+# Run these two following command on your own laptop
+ssh-keygen -t ed25519
+
+# Set your passphrase to 1
+ssh-copy-id your_server_username@your_server_ipv4_address
+```
+- Now when you login your `server` will not ask for a `password`
+
+### Turn off password
+- Run these following `configs` on your server
+- Open your `sshd_config`
+```bash
+sudo nano /etc/ssh/sshd_config
+```
+- Set `PubkeyAuthentication` to `yes`
+- Set `PasswordAuthentication` to `no`
+```bash
+PubkeyAuthentication yes
+# To disable tunneled clear text passwords...
+PasswordAuthentication no
+```
+- Restart `SSH`
+```bash
+sudo systemctl restart ssh
+```
+
+### Check what SSH is actually running
+```bash
+sudo sshd -T | grep -i passwordauth
+```
+- If you found it is still set to `yes`, fix the file inside that folder than restart `SSH` again
+```bash
+sudo systemctl restart ssh
+```
+
+### Check for every listening program
+```bash
+sudo ss -tulpn
+```
+- To disable the listening port which you don't need
+```bash
+sudo systemctl disable --now name_of_the_service
+```
+
+### Updates
+- Make sure to upgrade your `server system`
+```bash
+# For Ubuntu Servers
+sudo apt update && sudo apt upgrade && sudo apt install unattended-upgrade
+
+# Reboot to update your server
+systemctl reboot
+```
+
+### Fail2ban
+- Installation on your `server`
+```bash
+sudo apt install fail2ban
+```
+- To watch it work
+```bash
+sudo fail2ban-client status sshd
+```
+
+### Weekly security check
+- To see the bans
+```bash
+sudo fail2ban-client status sshd | tail -3
+```
+- Check who actually logged in
+```bash
+last -5
+```
+
+<br>
+
+---
+
+<br>
+
+## Xprinter xp-420b
+### Step 1: Install CUPS and system dependencies
+```bash
+sudo pacman -S --needed cups cups-filters ghostscript
+```
+
+### Step 2: Install and Set Permissions for Binary Filters
+```bash
+# Navigate to your extracted files directory
+cd ~/Documents/XP-420B_Driver/
+
+# Copy driver binaries to the CUPS filter directory
+sudo cp rastertosnailtspl-x64 /usr/lib/cups/filter/rastertosnailtspl
+sudo cp rastertosnailxpl-x64 /usr/lib/cups/filter/rastertosnailxpl
+sudo cp rastertosnailzpl-x64 /usr/lib/cups/filter/rastertosnailzpl
+sudo cp rastertosnailep2-x64 /usr/lib/cups/filter/rastertosnailep2
+
+# Set standard permissions and root ownership
+sudo chown root:root /usr/lib/cups/filter/rastertosnail*
+sudo chmod 755 /usr/lib/cups/filter/rastertosnail*
+
+# Create the symlink expected by the XP-420B PPD configuration
+sudo ln -sf /usr/lib/cups/filter/rastertosnailtspl /usr/lib/cups/filter/rastertosnailtspl-xprinter
+```
+
+### Step 3: Install the Printer PPD File
+```bash
+sudo mkdir -p /usr/share/cups/model/xprinter
+sudo cp ~/Documents/XP-420B_Driver/XP-420B.ppd /usr/share/cups/model/xprinter/
+sudo chmod 644 /usr/share/cups/model/xprinter/XP-420B.ppd
+```
+
+### Step 4: Start the CUPS Service
+```bash
+sudo systemctl enable --now cups.service
+sudo systemctl restart cups.service
+```
+
+### Step 5: Register the USB Printer Queue
+```bash
+# 1. Verify USB device connectivity (should return: direct usb://Xprinter/XP-420B...)
+lpinfo -v | grep usb
+
+# 2. Register printer queue
+sudo lpadmin -p "Xprinter_XP-420B" \
+  -v "usb://Xprinter/XP-420B?serial=00000000000001" \
+  -E \
+  -P /usr/share/cups/model/xprinter/XP-420B.ppd
+```
+
+### Verify and Send a Test Print Job
+```bash
+# Check queue status (should state "printer Xprinter_XP-420B is idle")
+lpstat -p Xprinter_XP-420B -l
+
+# Print a test page
+lpr -P Xprinter_XP-420B /usr/share/cups/data/testprint
+```
