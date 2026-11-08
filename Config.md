@@ -528,7 +528,7 @@ mkdir -p ~/.config/ghostty
 nano ~/.config/ghostty/config
 
 
-# config file
+
 # --- Font ---
 font-family = JetBrains Mono
 font-size = 15
@@ -537,14 +537,14 @@ font-variation = wght=600
 # --- Appearance & Window ---
 foreground = #ffffff
 background = #000000
-selection-foreground = #ffffff
-selection-background = #000000
+selection-foreground = #000000
+selection-background = #ffffff
 
 # Liquid Glass Visuals
-background-opacity = 0.75
-background-blur-radius = 20
+# background-opacity = 0.75
+# background-blur-radius = 50
 
-window-padding-x = 12
+window-padding-x = 10
 window-padding-y = 10
 window-decoration = false
 maximize = true
@@ -1273,8 +1273,9 @@ ssh-copy-id your_server_username@your_server_ipv4_address
 ```
 - Now when you login your `server` will not ask for a `password`
 
+<br>
+
 ### Turn off password
-- Run these following `configs` on your server
 - Open your `sshd_config`
 ```bash
 sudo nano /etc/ssh/sshd_config
@@ -1291,6 +1292,8 @@ PasswordAuthentication no
 sudo systemctl restart ssh
 ```
 
+<br>
+
 ### Check what SSH is actually running
 ```bash
 sudo sshd -T | grep -i passwordauth
@@ -1300,6 +1303,8 @@ sudo sshd -T | grep -i passwordauth
 sudo systemctl restart ssh
 ```
 
+<br>
+
 ### Check for every listening program
 ```bash
 sudo ss -tulpn
@@ -1308,6 +1313,8 @@ sudo ss -tulpn
 ```bash
 sudo systemctl disable --now name_of_the_service
 ```
+
+<br>
 
 ### Updates
 - Make sure to upgrade your `server system`
@@ -1319,6 +1326,8 @@ sudo apt update && sudo apt upgrade && sudo apt install unattended-upgrade
 systemctl reboot
 ```
 
+<br>
+
 ### Fail2ban
 - Installation on your `server`
 ```bash
@@ -1328,6 +1337,8 @@ sudo apt install fail2ban
 ```bash
 sudo fail2ban-client status sshd
 ```
+
+<br>
 
 ### Weekly security check
 - To see the bans
