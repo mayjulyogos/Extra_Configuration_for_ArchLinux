@@ -233,12 +233,74 @@ sudo pacman -S cuda
 
 <br>
 
+## Fctix 5
+- For Chinese Input
+```bash
+sudo pacman -S fcitx5 fcitx5-configtool fcitx5-chinese-addons fcitx5-gtk fcitx5-qt
+```
+- Add environment variables to `hyprland.lua`
+- Fcitx5 prefers using `Wayland's native input method protocol` instead of forcing applications through these `older input modules`. Having them set can occasionally cause `input glitches` or `warning popups`.
+- So it is recommended to commend out these following environments variable
+```bash
+-------------------------------
+---- ENVIRONMENT VARIABLES ----
+-------------------------------
+
+hl.env("XCURSOR_SIZE", "24")
+hl.env("HYPRCURSOR_SIZE", "24")
+
+-- Fcitx5 Framework Input Rules
+-- hl.env("IMMODULE", "fcitx")
+-- hl.env("XMODIFIERS", "@im=fcitx")
+-- hl.env("GTK_IM_MODULE", "fcitx")
+-- hl.env("QT_IM_MODULE", "fcitx")
+-- hl.env("SDL_IM_MODULE", "fcitx")
+-- hl.env("GLFW_IM_MODULE", "ibus") -- Fallback for specific GLFW windows
+```
+- Add Autostart Fctix5 Deamon
+```bash
+-------------------
+---- AUTOSTART ----
+-------------------
+
+-- See https://wiki.hypr.land/configuring/core/autostart/
+
+-- Autostart necessary processes (like notifications daemons, status bars, etc.)
+-- Or execute your favorite apps at launch like this:
+--
+hl.on("hyprland.start", function () 
+   hl.exec_cmd("nm-applet")
+   hl.exec_cmd("/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1")
+   hl.exec_cmd("hyprpaper")
+   hl.exec_cmd("hyprpm reload")
+   hl.exec_cmd("elephant")
+   hl.exec_cmd("fcitx5 -d")
+end)
+```
+
+### Steps to add Chinese input
+- Launch Fcitx 5 Configuration
+- Search for `Chinese Pinyin` using the Search bar under `Available Input Methods:`
+- Add the Pinyin input method by pressing the `left arrow` button
+- Now the `Pinyin` will shows up at the left side panel bellow your `English` Input
+- You may press on the settings button to change how many candidates will shows each time
+- You may also navigate to `Addons`
+- Press the `Configure` button next of `Classic User Interface`
+- You may change your `Font Type and Font Size`
+- You may also change the theme to `dark or light`
+
+<br>
+
+---
+
+<br>
+
 ## Install yay and CoolerControl
 * Using CoolerControl you may also create your own cooling fan curve which your fan spin following by the temperature of your hardware.
 ```bash
 sudo pacman -S qt6-wayland
 sudo pacman -S liquidctl
-yay -S coolercontrol-bin
+sudo pacman -S coolercontrol
 sudo systemctl enable --now coolercontrold
 
 # Open it in your web browser
@@ -1356,6 +1418,48 @@ last -5
 
 <br>
 
+## Tailscale
+Installation
+```bash
+curl -fsSL https://tailscale.com/install.sh | sh
+```
+
+Status & Verification
+- `tailscale status` — Displays the connection status, tailnet IP addresses, and active peers on your network.
+- `tailscale ip` — Prints the Tailscale IPv4 and IPv6 addresses of your current device.
+- `tailscale ping <peer-ip-or-name>` — Tests the connection to another device on your network and shows whether it is connecting via a direct peer-to-peer route or relayed (DERP).
+
+Managing the Connection
+- `tailscale up` — Starts Tailscale and connects the device to your tailnet.
+- `tailscale down` — Disconnects your device from the tailnet (stops traffic routing but keeps the daemon running).
+- `tailscale logout` — Disconnects the machine and clears all authentication keys, logging you out completely.
+
+Feature Configuration (Flags for `tailscale up`)
+- `tailscale up --advertise-exit-node` — Configures the current device to act as an exit node (allowing other devices to route all their internet traffic through it).
+- `tailscale up --exit-node=<exit-node-ip-or-name>` — Forces your current device to route all its internet traffic through the specified exit node.
+- `tailscale up --exit-node-allow-lan-access` — Used alongside the exit node command to ensure you can still talk to devices on your local physical Wi-Fi/LAN.
+- `tailscale up --advertise-routes=192.168.1.0/24` — Configures the machine as a subnet router to expose an entire physical local network to your tailnet.
+
+File Sharing & SSH
+- `tailscale file send <peer-name> <path-to-file>` — Sends a file securely to another device on your tailnet using Taildrop.
+- `tailscale file get <target-directory>` — Retrieves files that have been sent to your device via Taildrop.
+- `tailscale ssh <user>@<peer-name>` — Establishes a secure SSH connection to another device without needing to manage SSH keys, provided Tailscale SSH is enabled.
+
+Diagnostics & Advanced
+- `tailscale netcheck` — Diagnoses your current physical network connection, showing your public IP, NAT mapping type, and latency to Tailscale relay servers.
+- `tailscale cert <tailnet-domain-name>` — Fetches or renews free Let's Encrypt TLS certificates for your machine’s Tailscale domain.
+- `tailscale version` — Displays the version of the Tailscale client currently installed.
+
+Elimintate SSH Keys Entirely with Tailscale SSH
+- `sudo tailscale up --ssh` Start Tailscale on the server with the SSH flag enabled
+- `tailscale ssh user@server-name` On your local device, simply run this command line to connect your server with the SSH Key
+
+<br>
+
+---
+
+<br>
+
 ## Xprinter xp-420b
 ### Step 1: Install CUPS and system dependencies
 ```bash
@@ -1413,4 +1517,71 @@ lpstat -p Xprinter_XP-420B -l
 
 # Print a test page
 lpr -P Xprinter_XP-420B /usr/share/cups/data/testprint
+```
+
+<br>
+
+---
+
+<br>
+
+## Green Tunnel
+### Installation
+- Install `Node.js` and `Green Tunnel` on Arch
+```bash
+sudo pacman -S nodejs npm
+npm install -g green-tunnel
+```
+### Create a Native Systemd User Service
+```bash
+# Create a Native Systemd User Service
+mkdir -p ~/.config/systemd/user/
+
+# Create and open the service file:
+nano ~/.config/systemd/user/greentunnel.service
+```
+
+### Paste the following configuration:
+```bash
+[Unit]
+Description=Green Tunnel Proxy Service
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/home/arch/.npm-global/bin/gt -p 8080
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=default.target
+```
+
+### Save the file, then enable and start the service for your user:
+```bash
+systemctl --user daemon-reload
+systemctl --user enable --now greentunnel.service
+```
+
+### Verification
+```bash
+systemctl --user status greentunnel.service
+```
+
+### Configure Hyprland Environment Variables
+- Edit your `~/.config/hypr/hyprland.lua` file 
+- Add these following lines under the `---- Environment ----` section
+```bash
+-- Green Tunnel Proxy Configuration
+hl.env("http_proxy", "http://127.0.0.1:8080/")
+hl.env("https_proxy", "http://127.0.0.1:8080/")
+hl.env("HTTP_PROXY", "http://127.0.0.1:8080/")
+hl.env("HTTPS_PROXY", "http://127.0.0.1:8080/")
+hl.env("no_proxy", "localhost,127.0.0.1,.local")
+hl.env("NO_PROXY", "localhost,127.0.0.1,.local")
+```
+
+### Verification
+```bash
+ss -tulpn | grep 8080
 ```
