@@ -1585,3 +1585,101 @@ hl.env("NO_PROXY", "localhost,127.0.0.1,.local")
 ```bash
 ss -tulpn | grep 8080
 ```
+
+<br>
+
+---
+
+<br>
+
+## How to Mount Any External Drive Permanently on Arch Linux
+When mounting an external drive automatically on boot using /etc/fstab, the configuration depends entirely on your drive's filesystem. Using the wrong options can lead to mount failures, read-only errors, or permission issues. Here is a comprehensive, universal guide tailored for your GitHub repository. It explains how to identify any drive's filesystem and partition type, and provides clear, adaptable templates for the most common filesystems (exFAT, NTFS, ext4, and vfat).
+
+<br>
+
+### 1. Verify Drive Details: Check UUID and filesystem.
+- Connect your external drive.
+- Run `lsblk` to find your partition name (e.g., `/dev/sda1`, `/dev/sdb1`).
+- Run the following command with your specific partition to inspect its filesystem and UUID:
+- _(Replace `/dev/sdX1` with your actual partition name)._
+```bash
+lsblk -f /dev/sdX1
+```
+#### Look at the output columns:
+- **`FSTYPE`**: Tells you the filesystem (e.g., `exfat`, `ntfs`, `ext4`, `vfat`). **You must match this in your fstab entry.**
+- **`UUID`**: The unique identifier of the partition. **Always use `UUID` instead of `device names`** (like `/dev/sda1`), because device letters can change randomly after a reboot or when other drives are plugged in.
+
+<br>
+
+### 2. Install Required Filesystem Tools
+- Arch Linux does not enable support for all filesystems by default. Depending on what your drive uses, install the corresponding package:
+- **For `exfat` drives:**
+```
+sudo pacman -S exfatprogs
+```
+- **For `ntfs` drives:**   
+```
+sudo pacman -S ntfs-3g
+```
+- For `ext4` / `vfat` / `fat32`:_Built-in to the Linux kernel / standard utils (`dosfstools` for vfat)._
+
+<br>
+
+### 3. Create the Mount Point Directory: Target folder.
+- Create the folder where the external drive will be attached to your file system tree:
+```bash
+sudo mkdir -p /mnt/storage
+```
+
+<br>
+
+### 4. Configure `/etc/fstab` Based on Your Filesystem
+- Open the system's static filesystem table with a text editor:
+- Scroll to the bottom of the file and add **one** of the lines below, depending strictly on the `FSTYPE` you found in **Step 1**. Make sure to replace `YOUR-UUID-HERE` with your actual drive `UUID`.
+```bash
+sudo nano /etc/fstab
+```
+
+#### Option A: For `exFAT` Filesystems
+- _Why:_ `exFAT` does not natively support Linux POSIX file permissions. The `uid=1000,gid=1000` options force your local user account to own and have write access to the mounted files.
+```text
+UUID=YOUR-UUID-HERE /mnt/storage exfat defaults,uid=1000,gid=1000,rw,nofail 0 0
+```
+#### Option B: For `NTFS` Filesystems
+- _Why:_ Uses the `ntfs-3g` driver for stable read/write access, mapping ownership to your local user ID (`1000`).
+```bash
+UUID=YOUR-UUID-HERE /mnt/storage ntfs-3g defaults,uid=1000,gid=1000,rw,nofail 0 0
+```
+#### Option C: For `ext4` Filesystems (Linux-native)
+- _Why:_ `ext4` natively supports Linux permissions. You do not need `uid`/`gid` here; instead, you can change ownership _after_ mounting using `sudo chown -R $USER:$USER /mnt/storage`.
+```bash
+UUID=YOUR-UUID-HERE /mnt/storage ext4 defaults,noatime,nofail 0 2
+```
+#### Option D: For `vfat` / `FAT32` Filesystems
+```bash
+UUID=YOUR-UUID-HERE /mnt/storage vfat defaults,uid=1000,gid=1000,rw,nofail 0 0
+```
+
+<br>
+
+### 5. Reload Systemd and Test: Apply changes immediately.
+- Reload the systemd daemon to recognize the updated fstab file, then test the mount:
+```bash
+sudo systemctl daemon-reload
+sudo mount -a
+```
+
+<br>
+
+### Verification
+- To confirm everything is mounted correctly and you have full read/write permissions as a regular user:
+#### 1. Check the mount status:
+- _(You should see `/mnt/storage` listed under `MOUNTPOINTS`)._  
+```bash
+lsblk -f /dev/sda1
+```  
+#### 2. Test creating a file without `sudo`:
+```bash
+touch /mnt/storage/test.txt
+rm /mnt/storage/test.txt
+```
