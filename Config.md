@@ -136,6 +136,29 @@ sudo systemctl enable --now reflector.timer
 
 <br>
 
+## Zsh
+```bash
+# Installation
+sudo pacman -S zsh zsh-completions
+
+# Set Zsh as your default shell
+sudo chsh -s /usr/bin/zsh arch
+
+# Log out of your Arch Linux user session completely or restart your computer to apply changes
+
+# Install oh-my-zsh
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+
+# Install standard Nerd Fonts package for using advanced theme
+sudo pacman -S ttf-nerd-fonts-symbols-common
+```
+
+<br>
+
+---
+
+<br>
+
 
 ## Firewalld & GNOME Integration
 ```bash
@@ -1613,15 +1636,15 @@ lsblk -f /dev/sdX1
 
 ### 2. Install Required Filesystem Tools
 - Arch Linux does not enable support for all filesystems by default. Depending on what your drive uses, install the corresponding package:
-- **For `exfat` drives:**
-```
+```bash
+# For exfat drives:
 sudo pacman -S exfatprogs
-```
-- **For `ntfs` drives:**   
-```
+
+# For ntfs drives:
 sudo pacman -S ntfs-3g
+
+# For ext4 / vfat / fat32: Built-in to the Linux kernel / standard utils (dosfstools for vfat).
 ```
-- For `ext4` / `vfat` / `fat32`:_Built-in to the Linux kernel / standard utils (`dosfstools` for vfat)._
 
 <br>
 
