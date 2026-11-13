@@ -1770,3 +1770,27 @@ sudo firewall-cmd --add-port=53317/tcp --permanent
 sudo firewall-cmd --add-port=53317/udp --permanent
 sudo firewall-cmd --reload
 ```
+
+<br>
+
+---
+
+<br>
+
+## Gwenview
+- The `image viewer` created by `KDE`
+```bash
+sudo pacman -S gwenview
+```
+
+<br>
+
+---
+
+<br>
+
+## Libre Office
+- The best alternative to `Microsoft Office`
+```bash
+sudo flatpak install -y flathub org.libreoffice.LibreOffice
+```
