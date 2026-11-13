@@ -1820,3 +1820,14 @@ sudo pacman -S gwenview
 ```bash
 sudo flatpak install -y flathub org.libreoffice.LibreOffice
 ```
+
+<br>
+
+---
+
+<br>
+
+## Visual Studio Code
+```bash
+yay -S visual-studio-code-bin
+```
