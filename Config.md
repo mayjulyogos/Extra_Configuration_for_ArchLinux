@@ -1706,3 +1706,48 @@ lsblk -f /dev/sda1
 touch /mnt/storage/test.txt
 rm /mnt/storage/test.txt
 ```
+
+<br>
+
+---
+
+<br>
+
+## Distrobox
+### Installation
+```bash
+sudo pacman -S distrobox podman
+```
+
+### Create container
+- Create specific folder as storage for the containers (optional)
+```bash
+mkdir container-folder
+```
+- Create the container
+```bash
+distrobox create \
+  --image fedora:latest \
+  --name container_name \
+  --nvidia \
+  --home /path/to/your/container-folder
+```
+
+### Launch and start using your distrobox container
+```bash
+distrobox enter container_name
+```
+
+### Exclude the container folder from your system snapshots
+```bash
+distrobox stop container_name
+sudo mv /path/to/container-folder /path/to/container-folder.bak
+sudo btrfs subvolume create /path/to/container-folder
+sudo cp -a /path/to/container-folder.bak/. /path/to/container-folder
+
+# Verification
+# Check if /path/to/container-folder is under the list
+sudo btrfs subvolume list /
+  
+sudo rm -rf /path/to/container-folder.bak
+```
