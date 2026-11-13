@@ -419,19 +419,38 @@ yt-dlp --no-playlist -f "bv*[height<=1080][fps<=30]+ba/b[height<=1080][fps<=30]"
 <br>
 
 ## Davinci Resolve
+### Installation
 ```bash
-# 1. Set up your AUR development folder and clone the repository
-mkdir -p ~/AUR
-cd ~/AUR
-git clone https://aur.archlinux.org/davinci-resolve.git
-cd davinci-resolve
+# 1. Install Fuse dependencies
+sudo pacman -S fuse2
 
-# 2. Move your downloaded zip (regardless of version) into the build folder
-mv ~/Documents/DaVinci_Resolve_*_Linux.zip .
+# 2. Extract your downloaded zip file
+unzip filename.zip -d /DaVinci_Resolve_Linux
+cd /DaVinci_Resolve_Linux
 
-# 3. Compile and install the package
-# (makepkg will automatically look for the zip in this directory)
-makepkg -si
+# 3. Make your .run installer file executable
+sudo chmod +x ./DaVinci_Resolve_*_Linux.run
+
+# 4. Run the installer
+./DaVinci_Resolve_21.2_Linux.run
+```
+
+### Uninstallation
+```bash
+# Run the installer again to uninstall DaVinci Resolve
+
+rm -rf ~/.local/share/DaVinciResolve
+rm -rf ~/.cache/DaVinci_Resolve_Welcome
+
+# Remove the default Media folders created in your user directory
+rm -rf ~/Documents/BlackmagicDesign
+rm -rf "~/DaVinci Resolve Media"
+
+# Clean up the text file log saved on your Desktop
+rm -f ~/Desktop/davinci_files.txt
+
+# Force clean the Application Root folder if any non-tracked files remained inside
+sudo rm -rf /opt/resolve
 ```
 
 <br>
