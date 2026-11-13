@@ -742,6 +742,13 @@ sudo systemctl start <service-name>
 ## How to resync time
 ```bash
 sudo timedatectl set-ntp false && sudo timedatectl set-ntp true
+
+# Set your timezone correctly
+# List available timezone
+timedatectl list-timezones
+
+# Set your specific timezone
+sudo timedatectl set-timezone Your/Timezone
 ```
 
 <br>
