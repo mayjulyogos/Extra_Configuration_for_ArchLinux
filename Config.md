@@ -1751,3 +1751,22 @@ sudo btrfs subvolume list /
   
 sudo rm -rf /path/to/container-folder.bak
 ```
+
+<br>
+
+---
+
+<br>
+
+## LocalSend
+### Installation
+```bash
+sudo flatpak install -y flathub org.localsend.localsend_app
+```
+### Firewalld Configs
+- You need to allow `port 53317` using firewalld to allow localsend works
+```bash
+sudo firewall-cmd --add-port=53317/tcp --permanent
+sudo firewall-cmd --add-port=53317/udp --permanent
+sudo firewall-cmd --reload
+```
