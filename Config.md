@@ -403,13 +403,13 @@ deno --version
 
 # Example command lines
 # Video and audio
-yt-dlp -f "bestvideo+bestaudio/best" --merge-output-format mkv --audio-format flac -x "https://www.youtube.com/watch?v=R8MZbl-GRdY"
+yt-dlp -f "bestvideo+bestaudio/best" --merge-output-format mkv "https://www.youtube.com/watch?v=1Vyzla9mx4g"
 
 # Audio only
-yt-dlp -f "bestaudio" -x --audio-format flac "https://www.youtube.com/watch?v=R8MZbl-GRdY"
+yt-dlp -f "bestaudio" -x --audio-format flac "https://www.youtube.com/watch?v=1Vyzla9mx4g"
 
 # Old TVs Compatibility
-yt-dlp --no-playlist -f "bv*[height<=1080][fps<=30]+ba/b[height<=1080][fps<=30]" --recode-video mp4 --postprocessor-args "ffmpeg:-c:v libx264 -preset fast -crf 22 -c:a aac -b:a 192k" "https://www.youtube.com/watch?v=pszihOrS21g"
+yt-dlp --no-playlist -f "bv*[height<=1080][fps<=30]+ba/b[height<=1080][fps<=30]" --recode-video mp4 --postprocessor-args "ffmpeg:-c:v libx264 -preset fast -crf 22 -c:a aac -b:a 192k" "https://www.youtube.com/watch?v=1Vyzla9mx4g"
 ```
 
 <br>
