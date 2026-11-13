@@ -1831,3 +1831,30 @@ sudo flatpak install -y flathub org.libreoffice.LibreOffice
 ```bash
 yay -S visual-studio-code-bin
 ```
+
+<br>
+
+---
+
+<br>
+
+## Brother DCP-L2640DW
+```bash
+# 1. Update your system and install build tools & required dependencies
+sudo pacman -Syu --needed base-devel git lib32-glibc poppler-data
+
+# 2. Ensure the CUPS printing service is enabled and running
+sudo systemctl enable --now cups.service
+
+# 3. Install the official AUR driver package using yay
+yay -S brother-dcpl2640dw
+
+# 4. Check for your Device URI
+lpinfo -v
+
+# 5. Register the printer queue in CUPS using your exact USB serial URI and the AUR PPD file
+sudo lpadmin -p DCPL2640DW -E -v usb://Brother/DCP-L2640DW?serial=E82897F6N254111 -P /usr/share/cups/model/Brother/brother-DCPL2640DW-cups-en.ppd
+
+# 6. Restart the CUPS print scheduler to load everything properly
+sudo systemctl restart cups.service
+```
