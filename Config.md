@@ -490,7 +490,7 @@ sudo mv /var/lib/libvirt/images /var/lib/libvirt/images.bak
 sudo btrfs subvolume create /var/lib/libvirt/images
 
 # 3. Move your files back and clean up
-sudo mv /var/lib/libvirt/images.bak/* /var/lib/libvirt/images/
+sudo mv /var/lib/libvirt/images.bak/ /var/lib/libvirt/images/
 sudo rm -rf /var/lib/libvirt/images.bak
 
 # 4. Restart libvirtd
