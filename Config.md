@@ -422,7 +422,7 @@ yt-dlp --no-playlist -f "bv*[height<=1080][fps<=30]+ba/b[height<=1080][fps<=30]"
 ### Installation
 ```bash
 # 1. Install Fuse dependencies
-sudo pacman -S fuse2
+sudo pacman -S --noconfirm fuse2 libxcrypt-compat glu apr-util
 
 # 2. Extract your downloaded zip file
 unzip filename.zip -d /DaVinci_Resolve_Linux
