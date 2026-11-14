@@ -1857,4 +1857,7 @@ sudo lpadmin -p DCPL2640DW -E -v usb://Brother/DCP-L2640DW?serial=E82897F6N25411
 
 # 6. Restart the CUPS print scheduler to load everything properly
 sudo systemctl restart cups.service
+
+# To print file using command line
+lp -d DCPL2640DW -o sides=two-sided-long-edge -o fit-to-page file.pdf
 ```
