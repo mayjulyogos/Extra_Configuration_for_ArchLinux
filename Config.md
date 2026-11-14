@@ -403,10 +403,10 @@ deno --version
 
 # Example command lines
 # Video and audio
-yt-dlp -f "bestvideo+bestaudio/best" --merge-output-format mov --postprocessor-args "Merger:-c:v copy -c:a pcm_s16le" "https://www.youtube.com/watch?v=1Vyzla9mx4g&t=3421s"
+yt-dlp -f "bestvideo+bestaudio/best" --merge-output-format mkv --ppa "Merger:-c:v copy -c:a pcm_s16le -ar 48000" "https://www.youtube.com/watch?v=1Vyzla9mx4g&t=3421s"
 
 # Audio only
-yt-dlp -f "bestaudio/best" -x --audio-format wav --postprocessor-args "ExtractAudio:-c:a pcm_s16le -ar 48000" "https://www.youtube.com/watch?v=1Vyzla9mx4g&t=3421s"
+yt-dlp -f "bestaudio/best" -x --audio-format wav --ppa "ExtractAudio:-c:a pcm_s16le -ar 48000" "https://www.youtube.com/watch?v=1Vyzla9mx4g&t=3421s"
 
 # Old TVs Compatibility
 yt-dlp --no-playlist -f "bv*[height<=1080][fps<=30]+ba/b[height<=1080][fps<=30]" --recode-video mp4 --postprocessor-args "ffmpeg:-c:v libx264 -preset fast -crf 22 -c:a aac -b:a 192k" "https://www.youtube.com/watch?v=1Vyzla9mx4g"
