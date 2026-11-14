@@ -1490,8 +1490,8 @@ Feature Configuration (Flags for `tailscale up`)
 - `tailscale up --advertise-routes=192.168.1.0/24` — Configures the machine as a subnet router to expose an entire physical local network to your tailnet.
 
 File Sharing & SSH
-- `tailscale file send <peer-name> <path-to-file>` — Sends a file securely to another device on your tailnet using Taildrop.
-- `tailscale file get <target-directory>` — Retrieves files that have been sent to your device via Taildrop.
+- `tailscale file cp peer-name path-to-file:` — Sends a file securely to another device on your tailnet using Taildrop.
+- `tailscale file get .` — Retrieves files that have been sent to your device via Taildrop.
 - `tailscale ssh <user>@<peer-name>` — Establishes a secure SSH connection to another device without needing to manage SSH keys, provided Tailscale SSH is enabled.
 
 Diagnostics & Advanced
