@@ -1675,6 +1675,24 @@ rm /mnt/storage/test.txt
 <br>
 
 ## Distrobox
+### Btrfs Overlay Fixes
+```bash
+# Use fuse-overlayfs
+sudo pacman -S --noconfirm fuse-overlayfs
+
+# Create the config file for podman storage settings
+mkdir -p ~/.config/containers
+nano ~/.config/containers/storage.conf
+
+# Paste these following lines into the storage.conf file
+# Press ctrl + o and ctrl + x to save and exit the conf file
+[storage]
+driver = "overlay"
+
+[storage.options]
+mount_program = "/usr/bin/fuse-overlayfs"
+```
+
 ### Installation
 ```bash
 sudo pacman -S distrobox podman
@@ -1691,7 +1709,8 @@ distrobox create \
   --image fedora:latest \
   --name container_name \
   --nvidia \
-  --home /path/to/your/container-folder
+  --home /path/to/your/container-folder \
+  --unshare-all
 ```
 
 ### Launch and start using your distrobox container
