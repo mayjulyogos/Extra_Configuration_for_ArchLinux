@@ -410,6 +410,19 @@ yt-dlp -f "bestaudio/best" -x --audio-format wav --ppa "ExtractAudio:-c:a pcm_s1
 
 # Old TVs Compatibility
 yt-dlp --no-playlist -f "bv*[height<=1080][fps<=30]+ba/b[height<=1080][fps<=30]" --recode-video mp4 --postprocessor-args "ffmpeg:-c:v libx264 -preset fast -crf 22 -c:a aac -b:a 192k" "https://www.youtube.com/watch?v=1Vyzla9mx4g"
+
+# FFMPEG Video Transcode
+ffmpeg -hwaccel cuda -i input.mkv \
+  -vf "scale=1920:1080:force_original_aspect_ratio=decrease:force_divisible_by=2" \
+  -fpsmax 30 \
+  -c:v h264_nvenc \
+  -preset p4 \
+  -cq 22 \
+  -pix_fmt yuv420p \
+  -c:a aac \
+  -b:a 192k \
+  -movflags +faststart \
+  output.mp4
 ```
 
 <br>
